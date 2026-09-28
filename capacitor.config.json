@@ -1,0 +1,6 @@
+{
+  "appId": "com.funcove.template",
+  "appName": "Template Game",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

@@ -1,0 +1,44 @@
+name: Publish iOS App
+
+on:
+  workflow_dispatch: # Allows the team to manually trigger deployment from GitHub UI
+
+jobs:
+  build-and-publish:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install JS Dependencies
+      run: npm install
+
+    - name: 📦 Build Web App (Vite)
+      run: npm run build
+
+    - name: ⚙️ Configure App Metadata
+      run: npm run setup:ios
+
+    - name: 🎨 Generate iOS Assets (Icons/Splash)
+      run: npx @capacitor/assets generate --ios
+
+    - name: 🔄 Sync Capacitor iOS Project
+      run: npm run sync:ios
+
+    - name: 💎 Setup Fastlane & Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.0'
+        bundler-cache: true
+
+    - name: 🚀 Build and Upload to TestFlight
+      env:
+        APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+        MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      run: bundle exec fastlane ios beta
